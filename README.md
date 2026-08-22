@@ -108,7 +108,7 @@ cp .env.example .env.local
 
 | Variable | Required | Notes |
 |---|---|---|
-| `GROQ_API_KEY` | Yes | Free tier at [console.groq.com](https://console.groq.com/keys). Without it, uploads still extract text but summarization returns a clear "not configured" error rather than crashing. |
+| `GROQ_API_KEY` | Yes | Free tier at [console.groq.com](https://console.groq.com/keys). Without it, uploads still extract text but summarization returns a clear "not configured" error rather than crashing. **Free-tier accounts are rate-limited to 8,000 tokens/minute for `openai/gpt-oss-120b`** -- see Limitations for what this means in practice. |
 
 ## Running the Application
 
@@ -126,8 +126,7 @@ Tested with generated fixtures covering both success and failure paths, through 
 - **Failure paths**: empty file, oversized file (>4MB), corrupt/garbage-byte PDF, missing file, missing/invalid fields on `/api/summarize` -- all return the correct status code and message
 - **Summarization logic**: JSON-parsing fallback (clean JSON, markdown-fenced JSON, malformed text, empty response), chunking, and the missing-API-key path -- unit-verified without live calls
 - **UI**: full upload -> processing -> summary flow, length-toggle regeneration, copy/download actions, error states, both desktop and mobile viewports, keyboard focus visibility
-
-**Not verified in this environment**: the live Groq API call itself. The build environment had no network access to `api.groq.com` and no API key was available. Verify this with a real key before submitting (see Local Setup).
+- **Live end-to-end**: confirmed working against the deployed app with a real `GROQ_API_KEY` -- upload, extraction, and summarization all verified against actual Groq output, not just the logic around it.
 
 ## Deployment
 
@@ -179,11 +178,11 @@ tessdata/                         # bundled Tesseract English model
 
 ## Limitations
 
-- **4MB upload limit.** This isn't an arbitrary product choice -- Vercel serverless functions hard-cap request bodies at 4.5MB, so 4MB leaves headroom for multipart overhead. A larger limit would silently fail in production.
+- **4MB upload limit (code-enforced).** This isn't an arbitrary product choice -- Vercel serverless functions hard-cap request bodies at 4.5MB, so 4MB leaves headroom for multipart overhead. A larger limit would silently fail in production.
+- **~50-60KB practical document size limit on a free-tier Groq key (not code-enforced -- a rate limit on Groq's side).** This is a separate, more restrictive ceiling than the 4MB upload cap above, and it's real-world rather than theoretical: confirmed by testing the deployed app. `openai/gpt-oss-120b` on Groq's free tier is limited to 8,000 tokens/minute; at roughly 4 characters per token in English, that's around 30-32K characters of extracted text before the prompt's own instructions and the summary's completion tokens are even counted. A file above ~55KB reliably extracts fine but then fails at the summarization step with a rate-limit error. This isn't a bug to fix in code -- it's the free tier's real capacity, and it goes away on a paid Groq plan. Large documents are already chunked (see How It Works) specifically to keep this manageable, but chunking reduces per-request size, not total tokens used across the whole document, so it doesn't get around a hard per-minute ceiling.
 - **Scanned PDFs cap at 8 OCR'd pages.** A longer scan will summarize only its first 8 pages; there's no chunked/background processing for very long scans.
 - **English OCR only.** `tesseract.js` supports other languages, but only English is bundled to keep the deploy size reasonable within the time budget.
 - **No persistence.** Refreshing the page loses the current result by design (see Security) -- there's no history or saved documents.
-- **Live summarization was not verified in the build environment** (no network access to the LLM provider) -- verify with a real API key before submitting.
 
 ## Future Improvements
 
