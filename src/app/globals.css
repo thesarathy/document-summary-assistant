@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #f4f6f5;
+  --color-paper-raised: #ffffff;
+  --color-ink: #1b2430;
+  --color-ink-muted: #5b6472;
+  --color-accent: #2f6f5e;
+  --color-accent-soft: #e4efec;
+  --color-line: #d8dcde;
+  --color-error: #a8412c;
+  --color-error-soft: #f6e9e6;
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+}
+
+body {
+  font-family: var(--font-body), sans-serif;
+}
+
+/* Visible focus ring everywhere, using the accent color rather than the
+   browser default, without removing it (accessibility requirement). */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Signature processing animation: a scan line sweeping down a page icon. */
+@keyframes scan-sweep {
+  0% { transform: translateY(-100%); opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translateY(420%); opacity: 0; }
+}
+.scan-line {
+  animation: scan-sweep 1.8s ease-in-out infinite;
+}
