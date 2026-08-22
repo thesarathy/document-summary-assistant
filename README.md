@@ -1,5 +1,7 @@
 # Document Summary Assistant
 
+**Live app: [document-summary-assistant-amber.vercel.app](https://document-summary-assistant-amber.vercel.app/)**
+
 Upload a PDF or image, get a faithful, length-controlled summary with key points — extracted and summarized without inventing anything that isn't on the page.
 
 Built for a technical assessment with an 8-hour time budget. This README explains what was actually built and why, not a generic feature list.
@@ -130,7 +132,9 @@ Tested with generated fixtures covering both success and failure paths, through 
 
 ## Deployment
 
-Deploy to Vercel:
+Live at **[document-summary-assistant-amber.vercel.app](https://document-summary-assistant-amber.vercel.app/)**, deployed on Vercel.
+
+To deploy your own instance:
 
 ```bash
 npm i -g vercel
